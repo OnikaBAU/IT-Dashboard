@@ -36,6 +36,7 @@ export type TaskNoteWithAuthor = {
   taskId: string;
   authorId: string | null;
   content: string;
+  imageUrls: string[];
   createdAt: Date;
   author: { id: string; fullName: string } | null;
 };

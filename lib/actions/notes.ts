@@ -8,10 +8,11 @@ export async function addTaskNote(data: {
   taskId: string;
   authorId?: string;
   content: string;
+  imageUrls?: string[];
 }) {
   const task = await prisma.task.findUnique({ where: { id: data.taskId } });
   const note = await prisma.taskNote.create({
-    data,
+    data: { ...data, imageUrls: data.imageUrls ?? [] },
     include: { author: { select: { id: true, fullName: true } } },
   });
   await logActivity({

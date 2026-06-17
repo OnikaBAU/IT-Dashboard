@@ -37,6 +37,12 @@ export function TaskForm({ open, onOpenChange, task, defaultUserId }: TaskFormPr
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<{ id: string; fullName: string }[]>([]);
+  const [title, setTitle] = useState(task?.title ?? "");
+  const [description, setDescription] = useState(task?.description ?? "");
+  const [assignedTo, setAssignedTo] = useState(task?.assignedTo ?? "");
+  const [dueDate, setDueDate] = useState(
+    task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
+  );
   const [userId, setUserId] = useState<string>(task?.userId ?? defaultUserId ?? "none");
   const [priority, setPriority] = useState<Priority>(task?.priority ?? "MEDIUM");
   const [status, setStatus] = useState<Status>(task?.status ?? "OPEN");
@@ -47,6 +53,10 @@ export function TaskForm({ open, onOpenChange, task, defaultUserId }: TaskFormPr
       getUsers().then((u) =>
         setUsers(u.map((x: { id: string; fullName: string }) => ({ id: x.id, fullName: x.fullName })))
       );
+      setTitle(task?.title ?? "");
+      setDescription(task?.description ?? "");
+      setAssignedTo(task?.assignedTo ?? "");
+      setDueDate(task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "");
       setUserId(task?.userId ?? defaultUserId ?? "none");
       setPriority(task?.priority ?? "MEDIUM");
       setStatus(task?.status ?? "OPEN");
@@ -54,20 +64,18 @@ export function TaskForm({ open, onOpenChange, task, defaultUserId }: TaskFormPr
     }
   }, [open, task, defaultUserId]);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    const form = e.currentTarget;
-    const dueDateVal = (form.elements.namedItem("dueDate") as HTMLInputElement).value;
     const data = {
       userId: userId === "none" ? undefined : userId,
-      title: (form.elements.namedItem("title") as HTMLInputElement).value,
-      description: (form.elements.namedItem("description") as HTMLTextAreaElement).value || undefined,
+      title,
+      description: description || undefined,
       category: category || undefined,
       priority,
       status,
-      assignedTo: (form.elements.namedItem("assignedTo") as HTMLInputElement).value || undefined,
-      dueDate: dueDateVal ? new Date(dueDateVal) : undefined,
+      assignedTo: assignedTo || undefined,
+      dueDate: dueDate ? new Date(dueDate) : undefined,
     };
     try {
       if (task) {
@@ -96,11 +104,11 @@ export function TaskForm({ open, onOpenChange, task, defaultUserId }: TaskFormPr
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <Label htmlFor="title">Title *</Label>
-              <Input id="title" name="title" defaultValue={task?.title} placeholder="Brief description of the issue" required />
+              <Input id="title" name="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Brief description of the issue" required />
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" defaultValue={task?.description ?? ""} placeholder="Detailed description..." rows={3} />
+              <Textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detailed description..." rows={3} />
             </div>
             <div className="space-y-1.5">
               <Label>User / Requester</Label>
@@ -153,13 +161,11 @@ export function TaskForm({ open, onOpenChange, task, defaultUserId }: TaskFormPr
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="assignedTo">Assigned Technician</Label>
-              <Input id="assignedTo" name="assignedTo" defaultValue={task?.assignedTo ?? ""} placeholder="Technician name" />
+              <Input id="assignedTo" name="assignedTo" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Technician name" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="dueDate">Due Date</Label>
-              <Input id="dueDate" name="dueDate" type="date"
-                defaultValue={task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""}
-              />
+              <Input id="dueDate" name="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
